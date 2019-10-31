@@ -2,11 +2,11 @@ package me.zhengjie.modules.security.security;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
+import me.zhengjie.modules.monitor.service.CacheService;
 import me.zhengjie.modules.security.utils.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -29,12 +29,12 @@ public class JwtAuthorizationTokenFilter extends OncePerRequestFilter {
 
     private final UserDetailsService userDetailsService;
     private final JwtTokenUtil jwtTokenUtil;
-    private final RedisTemplate redisTemplate;
+    private final CacheService cacheService;
 
-    public JwtAuthorizationTokenFilter(@Qualifier("jwtUserDetailsService") UserDetailsService userDetailsService, JwtTokenUtil jwtTokenUtil, RedisTemplate redisTemplate) {
+    public JwtAuthorizationTokenFilter(@Qualifier("jwtUserDetailsService") UserDetailsService userDetailsService, JwtTokenUtil jwtTokenUtil, CacheService cacheService) {
         this.userDetailsService = userDetailsService;
         this.jwtTokenUtil = jwtTokenUtil;
-        this.redisTemplate = redisTemplate;
+        this.cacheService = cacheService;
     }
 
     @Override
@@ -42,7 +42,7 @@ public class JwtAuthorizationTokenFilter extends OncePerRequestFilter {
         String authToken = jwtTokenUtil.getToken(request);
         OnlineUser onlineUser = null;
         try {
-            onlineUser = (OnlineUser)redisTemplate.opsForValue().get(onlineKey + authToken);
+            onlineUser = (OnlineUser)cacheService.getValue(onlineKey + authToken);
         } catch (ExpiredJwtException e) {
             log.error(e.getMessage());
         }

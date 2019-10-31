@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.exception.BadRequestException;
-import me.zhengjie.modules.monitor.service.RedisService;
+import me.zhengjie.modules.monitor.service.CacheService;
 import me.zhengjie.modules.security.security.AuthInfo;
 import me.zhengjie.modules.security.security.AuthUser;
 import me.zhengjie.modules.security.security.ImgResult;
@@ -43,15 +43,15 @@ public class AuthenticationController {
 
     private final JwtTokenUtil jwtTokenUtil;
 
-    private final RedisService redisService;
+    private final CacheService cacheService;
 
     private final UserDetailsService userDetailsService;
 
     private final OnlineUserService onlineUserService;
 
-    public AuthenticationController(JwtTokenUtil jwtTokenUtil, RedisService redisService, @Qualifier("jwtUserDetailsService") UserDetailsService userDetailsService, OnlineUserService onlineUserService) {
+    public AuthenticationController(JwtTokenUtil jwtTokenUtil, CacheService cacheService, @Qualifier("jwtUserDetailsService") UserDetailsService userDetailsService, OnlineUserService onlineUserService) {
         this.jwtTokenUtil = jwtTokenUtil;
-        this.redisService = redisService;
+        this.cacheService = cacheService;
         this.userDetailsService = userDetailsService;
         this.onlineUserService = onlineUserService;
     }
@@ -62,9 +62,9 @@ public class AuthenticationController {
     public ResponseEntity login(@Validated @RequestBody AuthUser authorizationUser, HttpServletRequest request){
 
         // 查询验证码
-        String code = redisService.getCodeVal(authorizationUser.getUuid());
+        String code = cacheService.getCodeVal(authorizationUser.getUuid());
         // 清除验证码
-        redisService.delete(authorizationUser.getUuid());
+        cacheService.delete(authorizationUser.getUuid());
         if (StringUtils.isBlank(code)) {
             throw new BadRequestException("验证码已过期");
         }
@@ -105,7 +105,7 @@ public class AuthenticationController {
         // 获取运算的结果：5
         String result = captcha.text();
         String uuid = codeKey + IdUtil.simpleUUID();
-        redisService.saveCode(uuid,result);
+        cacheService.saveCode(uuid,result);
         return new ImgResult(captcha.toBase64(),uuid);
     }
 

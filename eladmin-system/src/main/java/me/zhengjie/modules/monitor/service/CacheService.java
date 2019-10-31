@@ -3,12 +3,14 @@ package me.zhengjie.modules.monitor.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Collection;
+
 /**
  * 可自行扩展
  * @author Zheng Jie
  * @date 2018-12-10
  */
-public interface RedisService {
+public interface CacheService {
 
     /**
      * findById
@@ -41,4 +43,9 @@ public interface RedisService {
      * 清空缓存
      */
     void deleteAll();
+    Object getValue(String key);
+
+    void setValue(String key,Object value,long time);
+
+    Collection keys(String s);
 }

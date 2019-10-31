@@ -4,7 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.modules.monitor.domain.vo.RedisVo;
-import me.zhengjie.modules.monitor.service.RedisService;
+import me.zhengjie.modules.monitor.service.CacheService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.*;
 @Api(tags = "系统：Redis缓存管理")
 public class RedisController {
 
-    private final RedisService redisService;
+    private final CacheService cacheService;
 
-    public RedisController(RedisService redisService) {
-        this.redisService = redisService;
+    public RedisController(CacheService cacheService) {
+        this.cacheService = cacheService;
     }
 
     @Log("查询Redis缓存")
@@ -31,7 +31,7 @@ public class RedisController {
     @ApiOperation("查询Redis缓存")
     @PreAuthorize("hasAnyRole('ADMIN','REDIS_ALL','REDIS_SELECT')")
     public ResponseEntity getRedis(String key, Pageable pageable){
-        return new ResponseEntity<>(redisService.findByKey(key,pageable), HttpStatus.OK);
+        return new ResponseEntity<>(cacheService.findByKey(key,pageable), HttpStatus.OK);
     }
 
     @Log("删除Redis缓存")
@@ -39,7 +39,7 @@ public class RedisController {
     @ApiOperation("删除Redis缓存")
     @PreAuthorize("hasAnyRole('ADMIN','REDIS_ALL','REDIS_DELETE')")
     public ResponseEntity delete(@RequestBody RedisVo resources){
-        redisService.delete(resources.getKey());
+        cacheService.delete(resources.getKey());
         return new ResponseEntity(HttpStatus.OK);
     }
 
@@ -48,7 +48,7 @@ public class RedisController {
     @ApiOperation("清空Redis缓存")
     @PreAuthorize("hasAnyRole('ADMIN','REDIS_ALL','REDIS_DELETE')")
     public ResponseEntity deleteAll(){
-        redisService.deleteAll();
+        cacheService.deleteAll();
         return new ResponseEntity(HttpStatus.OK);
     }
 }

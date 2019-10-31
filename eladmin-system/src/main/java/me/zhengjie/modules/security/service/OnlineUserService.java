@@ -1,5 +1,6 @@
 package me.zhengjie.modules.security.service;
 
+import me.zhengjie.modules.monitor.service.CacheService;
 import me.zhengjie.modules.security.security.JwtUser;
 import me.zhengjie.modules.security.security.OnlineUser;
 import me.zhengjie.utils.EncryptUtils;
@@ -9,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
@@ -29,10 +29,10 @@ public class OnlineUserService {
     @Value("${jwt.online}")
     private String onlineKey;
 
-    private final RedisTemplate redisTemplate;
+    private final CacheService cacheService;
 
-    public OnlineUserService(RedisTemplate redisTemplate) {
-        this.redisTemplate = redisTemplate;
+    public OnlineUserService(CacheService cacheService) {
+        this.cacheService = cacheService;
     }
 
     public void save(JwtUser jwtUser, String token, HttpServletRequest request){
@@ -46,16 +46,15 @@ public class OnlineUserService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        redisTemplate.opsForValue().set(onlineKey + token, onlineUser);
-        redisTemplate.expire(onlineKey + token,expiration, TimeUnit.MILLISECONDS);
+        cacheService.setValue(onlineKey + token,onlineUser,expiration);
     }
 
     public Page<OnlineUser> getAll(String filter, Pageable pageable){
-        List<String> keys = new ArrayList<>(redisTemplate.keys(onlineKey + "*"));
+        List<String> keys = new ArrayList<String>(cacheService.keys(onlineKey + "*"));
         Collections.reverse(keys);
         List<OnlineUser> onlineUsers = new ArrayList<>();
         for (String key : keys) {
-            OnlineUser onlineUser = (OnlineUser) redisTemplate.opsForValue().get(key);
+            OnlineUser onlineUser = (OnlineUser) cacheService.getValue(key);
             if(StringUtils.isNotBlank(filter)){
                 if(onlineUser.toString().contains(filter)){
                     onlineUsers.add(onlineUser);
@@ -75,11 +74,11 @@ public class OnlineUserService {
 
     public void kickOut(String val) throws Exception {
         String key = onlineKey + EncryptUtils.desDecrypt(val);
-        redisTemplate.delete(key);
+        cacheService.delete(key);
     }
 
     public void logout(String token) {
         String key = onlineKey + token;
-        redisTemplate.delete(key);
+        cacheService.delete(key);
     }
 }
