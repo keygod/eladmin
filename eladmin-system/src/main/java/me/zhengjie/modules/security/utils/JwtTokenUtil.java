@@ -2,6 +2,7 @@ package me.zhengjie.modules.security.utils;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.impl.DefaultClock;
+import lombok.extern.slf4j.Slf4j;
 import me.zhengjie.modules.security.security.JwtUser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Component
+@Slf4j
 public class JwtTokenUtil implements Serializable {
 
     private static final long serialVersionUID = -3301605591108950415L;
@@ -115,12 +117,18 @@ public class JwtTokenUtil implements Serializable {
 
     public Boolean validateToken(String token, UserDetails userDetails) {
         JwtUser user = (JwtUser) userDetails;
-        final Date created = getIssuedAtDateFromToken(token);
+        try {
+            final Date created = getIssuedAtDateFromToken(token);
 //        final Date expiration = getExpirationDateFromToken(token);
 //        如果token存在，且token创建日期 > 最后修改密码的日期 则代表token有效
-        return (!isTokenExpired(token)
-                && !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate())
-        );
+            return (!isTokenExpired(token)
+                    && !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate()));
+        }catch (Exception e){
+            log.error("token error"+e.getMessage(),e);
+            return false;
+        }
+
+
     }
 
     private Date calculateExpirationDate(Date createdDate) {

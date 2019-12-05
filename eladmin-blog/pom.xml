@@ -8,37 +8,19 @@
         <version>2.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
-    <artifactId>eladmin-system</artifactId>
+    <artifactId>eladmin-blog</artifactId>
     <name>核心模块</name>
-
     <properties>
         <jjwt.version>0.9.1</jjwt.version>
     </properties>
-
     <dependencies>
-        <dependency>
-            <groupId>me.zhengjie</groupId>
-            <artifactId>eladmin-generator</artifactId>
-            <version>2.2</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>me.zhengjie</groupId>
-                    <artifactId>eladmin-common</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
 
         <dependency>
             <groupId>me.zhengjie</groupId>
             <artifactId>eladmin-tools</artifactId>
             <version>2.2</version>
         </dependency>
-        <dependency>
-            <groupId>me.zhengjie</groupId>
-            <artifactId>eladmin-blog</artifactId>
-            <version>2.2</version>
-        </dependency>
+
         <!--jwt-->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -46,19 +28,7 @@
             <version>${jjwt.version}</version>
         </dependency>
 
-        <!-- quartz -->
-        <dependency>
-            <groupId>org.quartz-scheduler</groupId>
-            <artifactId>quartz</artifactId>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.ehcache/ehcache -->
-        <dependency>
-            <groupId>org.ehcache</groupId>
-            <artifactId>ehcache</artifactId>
-        </dependency>
-
     </dependencies>
-
     <build>
         <plugins>
             <plugin>
